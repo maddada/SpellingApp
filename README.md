@@ -1,5 +1,5 @@
 # SpellingApp
-An app that helps you learn to spell - side project to help my little brother practice for a competition
+An app that helps you learn to spell - side project to help my little brother practice for a spelling competition
 
 --------
 
