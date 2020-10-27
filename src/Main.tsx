@@ -242,9 +242,10 @@ const Main = () => {
                 {!prestarted && !started && <Button style={buttonStyle1} size="large" variant="contained" onClick={() => prestart()}>Begin</Button>}
                 {prestarted && !started &&
                     <>
-                        <p>You can press enter to check if your spelling is correct</p>
-                        <p>You can press enter to check if your spelling is correct</p>
+                        <p>You can press enter to submit</p>
                         <p>You can press enter when the input field is empty to hear the word again</p>
+                        <p>You can change the voice by clicking on the Change Voice button - useful for some words</p>
+                        <p>Skipping counts as 2 mistakes, but you'll get to see the correct spelling</p>
                         <p>If you finish all of the words while having 15 or less mistakes<br />and without using any hints then there's a prize for you :D</p>
                         <Button style={buttonStyle1} size="large" variant="contained" onClick={() => start()}>Got it</Button>
                     </>}
