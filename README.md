@@ -1,3 +1,9 @@
+# SpellingApp
+An app that helps you learn to spell - side project to help my little brother practice for a spelling competition
+
+--------
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
