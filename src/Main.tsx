@@ -165,7 +165,7 @@ const Main = () => {
     }
 
     function checkSpelling() {
-        let inputtedSpellingIsCorrect = typeof userInput === 'string' && userInput.toLowerCase().trim().replaceAll("[^A-Za-z]+", "") === currentWord.toLowerCase().trim();
+        let inputtedSpellingIsCorrect = typeof userInput === 'string' && userInput.toLowerCase().trim().replaceAll(/[^A-Za-z]+/g, "") === currentWord.toLowerCase().trim();
 
         if (inputtedSpellingIsCorrect) {
             setNumOfCorrect(numOfCorrect + 1);
