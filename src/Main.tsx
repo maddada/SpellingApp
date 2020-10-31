@@ -18,7 +18,7 @@ var voices = {
     'Microsoft Zira Desktop - English (United States)': 4,
 };
 
-function shuffle(array) {
+function shuffle(array: string[]) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
@@ -38,12 +38,12 @@ function shuffle(array) {
 
 let allHardWordsArray = allHardWordsStr.split(",");
 let allWordsArray = allWordsStr.split(",");
+let numOfTotalWords = allWordsArray.length;
 
 shuffle(allWordsArray);
 shuffle(allHardWordsArray);
 
 const Main = () => {
-    let numOfTotalWords = allWordsArray.length;
     let msg = useRef(new SpeechSynthesisUtterance());
     let [currentVoice, setCurrentVoice] = useState(4);
     let defaultVoiceOnce = useRef(0);
@@ -119,16 +119,22 @@ const Main = () => {
     }
 
     function start() {
-        if (hardMode) {
-            allWordsArray = allHardWordsArray;
-            numOfTotalWords = allWordsArray.length;
-            setCurrentWord(allWordsArray[currentWordIndex]);
-        }
-
         window.speechSynthesis.cancel();
         talk(`The word is: ${currentWord}`);
         setStarted(true);
     }
+
+    useEffect(() => {
+        if (hardMode) {
+            allWordsArray = shuffle(allHardWordsStr.split(","));
+            numOfTotalWords = allWordsArray.length;
+            setCurrentWord(allWordsArray[0]);
+        } else {
+            allWordsArray = shuffle(allWordsStr.split(","));
+            numOfTotalWords = allWordsArray.length;
+            setCurrentWord(allWordsArray[0]);
+        }
+    }, [hardMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         cancelSpeaking();
