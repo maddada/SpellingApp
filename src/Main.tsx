@@ -4,6 +4,10 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import { ToggleButton } from "@material-ui/lab";
+import CheckIcon from "@material-ui/icons/Check";
+
+let allHardWordsStr = `possibility,jewelry,avenue,february,distinguishable,situation,irritant,excitable,freight,comprehensible,compliant,extravagant,subscription,preferable,superintendent,january,factorization,chlorophyll,hippopotamus,surprise,consonant,politician,saucer,wheelbarrow,beige,awkward,bruise,application,mitochondria,wealthy,grasp,quiet,unfortunately,migration,ignorant,brilliant,assistant,hippopotami,artifact,immigrant,defendant,transpiration,wobble,agriculture,approximate,rounding,tangible,recession,cartographer,decadent,gullible,unique,chloroplast,shovel,betray,excellent,sheepish,pentameter,hedges,respiration,squirm,ashamed,authenticity,cytoplasm,substantial,stomata,subscription,function,organelle,specialize,scenery,recommend,specific,diffusion,surplus,slumber,quadriceps,specific,osmosis,august,mentor,solemn,criticize,inferential,sincerity,certificate,electricity,influential,estimate,scarcity,transferring,publicity,palatial,associate,vehicle,transferred,circulatory,phloem,tributary,xylem,threatening,restaurant,capillary,significance,receipt,transmitted,ventricle,reasonable,receiving,recruit,supposedly,reprimand,recipe,recognition,traveled,unnecessary,elasticity,vigorously,separate,university,traveling,spatial,ancestor,indices,business,secretary,spacious,souvenir,stationary,stationery,securing,statistics,supervisor,substitute,sincerely,visualize,circumnavigation,prescription,photosynthesis,tissue`;
 
 let allWordsStr = `possibility,continent,beetle,grasp,africa,jewelry,february,comic,killed,avenue,entrance,quiet,melody,climbed,valley,feast,bottom,wrote,freight,sheepish,register,youth,discard,betray,sleeve,continued,president,defendant,infant,launch,aware,immigrant,eagle,debate,trouble,irritant,layer,plains,situation,assistant,desirable,adaptable,station,brilliant,excitable,allowable,description,compliant,breakable,comfortable,prescription,extravagant,notable,distinguishable,subscription,ignorant,tolerable,preferable,condition,artifact,religion,membrane,introduction,migration,tradition,transportation,technique,nomad,ceremony,active,divisible,adapt,customary,passive,array,agriculture,folklore,inverse,composite,rounding,organ,regroup,factorization,wobble,surprise,january,april,ashamed,french,england,coward,consonant,hesitate,route,symbols,someone,sway,design,loyal,shovel,exactly,bruise,application,wheelbarrow,remain,awkward,beckon,hedges,beige,billion,saucer,wonder,breathe,triple,admission,smiled,succeed,bicycle,politician,angle,horrible,octave,drawing,absent,tangible,pentameter,recession,decadent,gullible,quadruple,concession,excellent,possible,unique,deception,frequent,permissible,quadriceps,production,impatient,comprehensible,uniform,reduction,cell,invisible,interact,chlorophyll,cytoplasm,tissue,specialize,chloroplast,organelle,function,surplus,activate,diffusion,specific,barter,photosynthesis,osmosis,mitochondria,economy,stomata,respiration,glucose,cultural,vascular,june,suppose,direct,supply,choose,august,october,december,single,coast,squirm,mentor,novel,menu,scissors,insects,information,period,desert,internal,express,autumn,increase,external,crimson,journey,convict,index,ancestor,flavor,finance,indices,further,substantial,wound,doctor,elasticity,spatial,business,provide,authenticity,essential,separate,fungus,criticize,inferential,approximate,fungi,electricity,influential,estimate,hippopotamus,publicity,palatial,associate,hippopotami,partial,residential,certificate,octopus,transpiration,artery,navigation,octopi,xylem,vein,convert,tributary,phloem,circulatory,emperor,mission,pigment,capillary,circumnavigation,slavery,absorb,chamber,cartographer,trading,evaporate,ventricle,colony,charter,raspberry,reasonable,receipt,Receiving,recipe,recognition,recommend,recruit,reddest,reprimand,resigned,restaurant,rotten,sandwich,scarcity,scenery,secretary,securing,significance,simile,sincerely,sincerity,situation,skeptical,slumber,smudge,solemn,souvenir,spacious,specific,stationary,stationery,statistics,subscription,substitute,superintendent,supervisor,supposedly,threatening,tolerate,tongue,tournament,tragedy,traitor,transferred,transferring,transmitted,traveled,traveling,unfortunately,uniform,university,unnecessary,valuable,various,vehicle,version,vertical,victim,vigorously,violation,visualize,volcano,voyage,wealthy,weapon,wheeze,wilderness`;
 
@@ -19,7 +23,6 @@ function shuffle(array) {
 
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
-
         // Pick a remaining element...
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
@@ -33,12 +36,14 @@ function shuffle(array) {
     return array;
 }
 
+let allHardWordsArray = allHardWordsStr.split(",");
 let allWordsArray = allWordsStr.split(",");
 
 shuffle(allWordsArray);
+shuffle(allHardWordsArray);
 
 const Main = () => {
-    const numOfTotalWords = allWordsArray.length;
+    let numOfTotalWords = allWordsArray.length;
     let msg = useRef(new SpeechSynthesisUtterance());
     let [currentVoice, setCurrentVoice] = useState(4);
     let defaultVoiceOnce = useRef(0);
@@ -56,6 +61,7 @@ const Main = () => {
     let [isError, setIsError] = useState(false);
     let [openedHintBefore, setOpenedHintBefore] = useState(false);
     let [prestarted, setPrestarted] = useState(false);
+    let [hardMode, setHardMode] = useState(false);
     const [open, setOpen] = React.useState(false);
 
     function cancelSpeaking() {
@@ -113,6 +119,11 @@ const Main = () => {
     }
 
     function start() {
+        if (hardMode) {
+            allWordsArray = allHardWordsArray;
+            numOfTotalWords = allWordsArray.length;
+        }
+
         window.speechSynthesis.cancel();
         talk(`The word is: ${currentWord}`);
         setStarted(true);
@@ -248,6 +259,25 @@ const Main = () => {
                         <p>Skipping counts as 2 mistakes, but you'll get to see the correct spelling</p>
                         <p>If you finish all of the words while having 15 or less mistakes<br />and without using any hints then there's a prize for you :D</p>
                         <br />
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td style={{ color: hardMode ? 'red' : '' }}>Hard Words Only&nbsp;&nbsp;</td>
+                                    <td><ToggleButton
+                                        value="check"
+                                        size="small"
+                                        selected={hardMode}
+                                        onChange={() => {
+                                            setHardMode(!hardMode);
+                                        }}>
+                                        <CheckIcon />
+                                    </ToggleButton>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
                         <br />
                         <Button style={buttonStyle1} size="large" variant="contained" onClick={() => start()}>Got it</Button>
                     </>}
