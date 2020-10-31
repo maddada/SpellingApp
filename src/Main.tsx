@@ -122,6 +122,7 @@ const Main = () => {
         if (hardMode) {
             allWordsArray = allHardWordsArray;
             numOfTotalWords = allWordsArray.length;
+            setCurrentWord(allWordsArray[currentWordIndex]);
         }
 
         window.speechSynthesis.cancel();
