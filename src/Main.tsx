@@ -2,21 +2,14 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
-import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { ToggleButton } from "@material-ui/lab";
 import CheckIcon from "@material-ui/icons/Check";
+import wordDefinition from "word-definition";
+
 
 let allHardWordsStr = `possibility,jewelry,avenue,february,distinguishable,situation,irritant,excitable,freight,comprehensible,compliant,extravagant,subscription,preferable,superintendent,january,factorization,chlorophyll,hippopotamus,surprise,consonant,politician,saucer,wheelbarrow,beige,awkward,bruise,application,mitochondria,wealthy,grasp,quiet,unfortunately,migration,ignorant,brilliant,assistant,hippopotami,artifact,immigrant,defendant,transpiration,wobble,agriculture,approximate,rounding,tangible,recession,cartographer,decadent,gullible,unique,chloroplast,shovel,betray,excellent,sheepish,pentameter,hedges,respiration,squirm,ashamed,authenticity,cytoplasm,substantial,stomata,subscription,function,organelle,specialize,scenery,recommend,specific,diffusion,surplus,slumber,quadriceps,specific,osmosis,august,mentor,solemn,criticize,inferential,sincerity,certificate,electricity,influential,estimate,scarcity,transferring,publicity,palatial,associate,vehicle,transferred,circulatory,phloem,tributary,xylem,threatening,restaurant,capillary,significance,receipt,transmitted,ventricle,reasonable,receiving,recruit,supposedly,reprimand,recipe,recognition,traveled,unnecessary,elasticity,vigorously,separate,university,traveling,spatial,ancestor,indices,business,secretary,spacious,souvenir,stationary,stationery,securing,statistics,supervisor,substitute,sincerely,visualize,circumnavigation,prescription,photosynthesis,tissue`;
-
 let allWordsStr = `possibility,continent,beetle,grasp,africa,jewelry,february,comic,killed,avenue,entrance,quiet,melody,climbed,valley,feast,bottom,wrote,freight,sheepish,register,youth,discard,betray,sleeve,continued,president,defendant,infant,launch,aware,immigrant,eagle,debate,trouble,irritant,layer,plains,situation,assistant,desirable,adaptable,station,brilliant,excitable,allowable,description,compliant,breakable,comfortable,prescription,extravagant,notable,distinguishable,subscription,ignorant,tolerable,preferable,condition,artifact,religion,membrane,introduction,migration,tradition,transportation,technique,nomad,ceremony,active,divisible,adapt,customary,passive,array,agriculture,folklore,inverse,composite,rounding,organ,regroup,factorization,wobble,surprise,january,april,ashamed,french,england,coward,consonant,hesitate,route,symbols,someone,sway,design,loyal,shovel,exactly,bruise,application,wheelbarrow,remain,awkward,beckon,hedges,beige,billion,saucer,wonder,breathe,triple,admission,smiled,succeed,bicycle,politician,angle,horrible,octave,drawing,absent,tangible,pentameter,recession,decadent,gullible,quadruple,concession,excellent,possible,unique,deception,frequent,permissible,quadriceps,production,impatient,comprehensible,uniform,reduction,cell,invisible,interact,chlorophyll,cytoplasm,tissue,specialize,chloroplast,organelle,function,surplus,activate,diffusion,specific,barter,photosynthesis,osmosis,mitochondria,economy,stomata,respiration,glucose,cultural,vascular,june,suppose,direct,supply,choose,august,october,december,single,coast,squirm,mentor,novel,menu,scissors,insects,information,period,desert,internal,express,autumn,increase,external,crimson,journey,convict,index,ancestor,flavor,finance,indices,further,substantial,wound,doctor,elasticity,spatial,business,provide,authenticity,essential,separate,fungus,criticize,inferential,approximate,fungi,electricity,influential,estimate,hippopotamus,publicity,palatial,associate,hippopotami,partial,residential,certificate,octopus,transpiration,artery,navigation,octopi,xylem,vein,convert,tributary,phloem,circulatory,emperor,mission,pigment,capillary,circumnavigation,slavery,absorb,chamber,cartographer,trading,evaporate,ventricle,colony,charter,raspberry,reasonable,receipt,Receiving,recipe,recognition,recommend,recruit,reddest,reprimand,resigned,restaurant,rotten,sandwich,scarcity,scenery,secretary,securing,significance,simile,sincerely,sincerity,situation,skeptical,slumber,smudge,solemn,souvenir,spacious,specific,stationary,stationery,statistics,subscription,substitute,superintendent,supervisor,supposedly,threatening,tolerate,tongue,tournament,tragedy,traitor,transferred,transferring,transmitted,traveled,traveling,unfortunately,uniform,university,unnecessary,valuable,various,vehicle,version,vertical,victim,vigorously,violation,visualize,volcano,voyage,wealthy,weapon,wheeze,wilderness`;
-
-var voices = {
-    'Google US English': 1,
-    'Google UK English Female': 2,
-    'Google UK English Male': 3,
-    'Microsoft Zira Desktop - English (United States)': 4,
-};
 
 function shuffle(array: string[]) {
     var currentIndex = array.length, temporaryValue, randomIndex;
@@ -45,8 +38,6 @@ shuffle(allHardWordsArray);
 
 const Main = () => {
     let msg = useRef(new SpeechSynthesisUtterance());
-    let [currentVoice, setCurrentVoice] = useState(4);
-    let defaultVoiceOnce = useRef(0);
     let [userInput, setUserInput] = useState('');
     let [numOfCorrect, setNumOfCorrect] = useState(0);
     let [numOfMistakes, setNumOfMistakes] = useState(0);
@@ -62,6 +53,9 @@ const Main = () => {
     let [openedHintBefore, setOpenedHintBefore] = useState(false);
     let [prestarted, setPrestarted] = useState(false);
     let [hardMode, setHardMode] = useState(false);
+    let [voices, setVoices] = useState([]);
+    let [currentVoiceIndex, setCurrentVoiceIndex] = useState(0);
+    let [useEnglishVoicesOnly, setUseEnglishVoicesOnly] = useState(true);
     const [open, setOpen] = React.useState(false);
 
     function cancelSpeaking() {
@@ -76,15 +70,6 @@ const Main = () => {
         setOpen(false);
     };
 
-    const useStyles = makeStyles((theme) => ({
-        root: {
-            width: '100%',
-            '& > * + *': {
-                marginTop: theme.spacing(2),
-            },
-        },
-    }));
-
     function Alert(props) {
         return <MuiAlert elevation={6} variant="filled" {...props} />;
     }
@@ -94,22 +79,43 @@ const Main = () => {
         msg.current.rate = 1; // From 0.1 to 10
         msg.current.pitch = 1; // From 0 to 2
         msg.current.text = text;
-        if (window.speechSynthesis.getVoices() && defaultVoiceOnce.current === 0) {
-            msg.current.voice = window.speechSynthesis.getVoices()[4];
-            defaultVoiceOnce.current = 1;
-        }
         window.speechSynthesis.speak(msg.current);
     }
 
-    function changeVoice() {
-        if (currentVoice < 5) {
-            setCurrentVoice(currentVoice + 1);
+    function nextVoice() {
+        if (currentVoiceIndex + 1 >= voices.length) {
+            setCurrentVoiceIndex(0);
         } else {
-            setCurrentVoice(1);
+            setCurrentVoiceIndex(currentVoiceIndex + 1);
         }
-        if (currentVoice === 1) { // skiping dutch
-            setCurrentVoice(currentVoice + 2);
+        cancelSpeaking();
+        setTimeout(() => {
+            talk(currentWord);
+        }, 100);
+    }
+
+    function prevVoice() {
+        if (currentVoiceIndex - 1 < 0) {
+            setCurrentVoiceIndex(voices.length - 1);
+        } else {
+            setCurrentVoiceIndex(currentVoiceIndex - 1);
         }
+        cancelSpeaking();
+        setTimeout(() => {
+            talk(currentWord);
+        }, 200);
+    }
+
+    function toggleUsingEnglishVoicesOnly() {
+        if (useEnglishVoicesOnly) {
+            setUseEnglishVoicesOnly(false);
+        } else {
+            setUseEnglishVoicesOnly(true);
+        }
+
+        setTimeout(() => {
+            talk(currentWord);
+        }, 150);
     }
 
     function prestart() {
@@ -138,6 +144,7 @@ const Main = () => {
 
     useEffect(() => {
         cancelSpeaking();
+
         return () => {
             setNumOfCorrect(0);
             setCurrentStreak(0);
@@ -150,9 +157,63 @@ const Main = () => {
             setPrestarted(false);
             setUnhiddenCurrentWordStr('');
             setCurrentWordIndex(0);
+            setCurrentVoiceIndex(0);
             cancelSpeaking();
+            setUseEnglishVoicesOnly(true);
         };
-    }, []); // don't auto refresh 
+    }, []); // don't auto refresh
+
+    useEffect(() => {
+        // set only english voices array
+        let allVoices = window?.speechSynthesis?.getVoices();
+        allVoices = allVoices.sort((a, b) => {
+            if (a.lang === 'en-US') {
+                return 1;
+            }
+            if (a.lang < b.lang) {
+                return -1;
+            } else if (a.lang > b.lang) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        if (useEnglishVoicesOnly) {
+            let allOtherVoices = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en')
+                    && !voice.lang.startsWith('en-US')
+                    && !voice.lang.startsWith('en-GB')
+                    && !voice.lang.startsWith('en-AU')
+                    && !voice.lang.startsWith('en-NZ')
+                    && !voice.lang.startsWith('en-CA');
+            });
+            let enGbOnlyTemp = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en-GB');
+            });
+            let enAuOnlyTemp = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en-AU');
+            });
+            let enNzOnlyTemp = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en-NZ');
+            });
+            let enCaOnlyTemp = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en-CA');
+            });
+            let enUsOnlyTemp = allVoices?.filter((voice) => {
+                return voice.lang.startsWith('en-US');
+            });
+            let voicesTemp = [...enUsOnlyTemp, ...enGbOnlyTemp, ...enCaOnlyTemp, ...enAuOnlyTemp, ...enNzOnlyTemp, ...allOtherVoices];
+
+            setVoices(voicesTemp);
+            console.log(voicesTemp);
+        } else {
+            setVoices(allVoices);
+        }
+
+        setCurrentVoiceIndex(0);
+
+    }, [started, useEnglishVoicesOnly]);
 
     useEffect(() => {
         if (started && numOfDoneWords !== 0 && currentStreak !== 0) {
@@ -164,9 +225,8 @@ const Main = () => {
     }, [started, currentWord]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        cancelSpeaking();
-        msg.current.voice = window.speechSynthesis.getVoices()[currentVoice];
-    }, [currentVoice]);
+        msg.current.voice = voices[currentVoiceIndex];
+    }, [voices, currentVoiceIndex]);
 
     function skip() {
         setOpen(true);
@@ -179,7 +239,6 @@ const Main = () => {
         setColorOfInput('primary');
         hideWordSpelling();
         setIsError(true);
-
     }
 
     function checkSpelling() {
@@ -322,7 +381,16 @@ const Main = () => {
                             <br />
                             <Button variant="contained" style={buttonStyle2} color="primary" onClick={() => checkSpelling()}>Check</Button><br />
                             <Button variant="contained" style={buttonStyle2} onClick={() => skip()}> Skip Word</Button><br />
-                            <Button variant="contained" style={buttonStyle2} onClick={() => window.open(`https://www.google.com/search?q=Dictionary&stick=H4sIAAAAAAAAAONQesSoyi3w8sc9YSmZSWtOXmMU4-LzL0jNc8lMLsnMz0ssqrRiUWJKzeNZxMqFEAMA7_QXqzcAAAA&zx=1603756488141#dobs=${currentWord}`, "_blank")}>Definition</Button><br />
+                            <Button variant="contained" style={buttonStyle2} onClick={() => {
+                                //window.open(`https://www.google.com/search?q=define+${currentWord}`, "_blank");
+                                wordDefinition.getDef(currentWord, 'en', null,
+                                    (res) => {
+                                        console.log(res)
+                                        talk(`category: ${res.category}  definition: ${res.definition}`);
+                                    });
+                            }}>
+                                Definition
+                            </Button><br />
 
                             <Button variant="contained" style={buttonStyle2} onClick={() => unhiddenCurrentWordStr ? hideWordSpelling() : showWordSpelling()}> {unhiddenCurrentWordStr ? "Hide Spelling" : "Show Spelling"}</Button><br />
                             <h2>{unhiddenCurrentWordStr}</h2>
@@ -336,10 +404,20 @@ const Main = () => {
                                 }}>Listen Again</Button><br />
                             <Button variant="contained" style={buttonStyle2}
                                 onClick={() => {
-                                    cancelSpeaking();
-                                    changeVoice();
-                                }}>Change Voice</Button><br />
-                            {voices[window?.speechSynthesis?.getVoices()[currentVoice]?.name]}- {window?.speechSynthesis?.getVoices()[currentVoice]?.name}
+                                    toggleUsingEnglishVoicesOnly();
+                                }}>
+                                {!useEnglishVoicesOnly ? "Use English Voices Only" : "Use All Voices"}
+                            </Button><br />
+                            <Button variant="contained" style={buttonStyle2}
+                                onClick={() => {
+                                    nextVoice();
+                                }}>Next Voice</Button><br />
+                            <Button variant="contained" style={buttonStyle2}
+                                onClick={() => {
+                                    prevVoice();
+                                }}>Prev Voice</Button><br />
+
+                            {(currentVoiceIndex != null ? currentVoiceIndex + 1 : '')}/{voices?.length} {voices[currentVoiceIndex]?.name?.replace('Online (Natural)', '').replace('Microsoft', '')}
                         </div>
                     </>
                 }
