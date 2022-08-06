@@ -385,7 +385,7 @@ const Main = () => {
                                 //window.open(`https://www.google.com/search?q=define+${currentWord}`, "_blank");
                                 wordDefinition.getDef(currentWord, 'en', null,
                                     (res) => {
-                                        console.log(res)
+                                        console.log(res);
                                         talk(`category: ${res.category}  definition: ${res.definition}`);
                                     });
                             }}>
@@ -416,8 +416,8 @@ const Main = () => {
                                 onClick={() => {
                                     prevVoice();
                                 }}>Prev Voice</Button><br />
-
-                            {(currentVoiceIndex != null ? currentVoiceIndex + 1 : '')}/{voices?.length} {voices[currentVoiceIndex]?.name?.replace('Online (Natural)', '').replace('Microsoft', '')}
+                            {(currentVoiceIndex != null ? currentVoiceIndex + 1 : '')}/{voices?.length}<br />
+                            {voices[currentVoiceIndex]?.name?.replace('Online (Natural)', '').replace('Microsoft', '')}
                         </div>
                     </>
                 }
